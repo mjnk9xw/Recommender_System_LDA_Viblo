@@ -66,7 +66,7 @@ def show_posts():
     posts = mongo_col.find({"idrs": {"$in": idrss}})
     random_posts = [
         {
-            "url": post["canonical_url"],
+            "url": post["url"],
             "title": post["title"],
             "slug": post["slug"]
         }
@@ -79,10 +79,10 @@ def show_posts():
 def show_post(slug):
     main_post = mongo_col.find_one({"slug": slug})
     main_post = {
-        "url": main_post["canonical_url"],
+        "url": main_post["url"],
         "title": main_post["title"],
         "slug": main_post["slug"],
-        "content": main_post["contents"]
+        "content": main_post["content"]
     }
 
     # preprocessing
@@ -101,7 +101,7 @@ def show_post(slug):
     posts = mongo_col.find({"idrs": {"$in": most_sim_ids}})
     related_posts = [
         {
-            "url": post["canonical_url"],
+            "url": post["url"],
             "title": post["title"],
             "slug": post["slug"]
         }
@@ -113,39 +113,39 @@ def show_post(slug):
     )
 
 
-@app.route('/posts_HAU/<slug>', methods=["GET"])
-def show_post_HAU(slug):
-    """
-    Author: Thanh Hau
-    """
-    from sklearn.externals import joblib  # noqa
-    sim_topics = joblib.load('data/similarity_dict_HAU.pkl')
-    main_post = mongo_col.find_one({"slug": slug})
-    main_post = [
-        {
-            "url": main_post["canonical_url"],
-            "title": main_post["title"],
-            "slug": main_post["slug"],
-            "content": main_post["contents"]
-        }
-    ]
-    main_post = main_post[0]
-
-    most_sim_slugs = sim_topics[slug]
-    posts = mongo_col.find({"slug": {"$in": most_sim_slugs}})
-    related_posts = [
-        {
-            "url": post["canonical_url"],
-            "title": post["title"],
-            "slug": post["slug"]
-        }
-        for post in posts
-    ]
-
-    return render_template(
-        'index.html', main_post=main_post, posts=related_posts
-    )
+# @app.route('/posts_HAU/<slug>', methods=["GET"])
+# def show_post_HAU(slug):
+#     """
+#     Author: Thanh Hau
+#     """
+#     from sklearn.externals import joblib  # noqa
+#     sim_topics = joblib.load('data/similarity_dict_HAU.pkl')
+#     main_post = mongo_col.find_one({"slug": slug})
+#     main_post = [
+#         {
+#             "url": main_post["url"],
+#             "title": main_post["title"],
+#             "slug": main_post["slug"],
+#             "content": main_post["contents"]
+#         }
+#     ]
+#     main_post = main_post[0]
+#
+#     most_sim_slugs = sim_topics[slug]
+#     posts = mongo_col.find({"slug": {"$in": most_sim_slugs}})
+#     related_posts = [
+#         {
+#             "url": post["canonical_url"],
+#             "title": post["title"],
+#             "slug": post["slug"]
+#         }
+#         for post in posts
+#     ]
+#
+#     return render_template(
+#         'index.html', main_post=main_post, posts=related_posts
+#     )
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='127.0.0.1', debug=True)

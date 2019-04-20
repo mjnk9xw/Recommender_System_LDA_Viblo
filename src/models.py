@@ -13,10 +13,10 @@ logging.basicConfig(format='%(levelname)s : %(message)s', level=logging.INFO)
 logging.root.level = logging.INFO
 
 
-PATH_DICTIONARY = "models/id2word.dictionary"
-PATH_CORPUS = "models/corpus.mm"
-PATH_LDA_MODEL = "models/LDA.model"
-PATH_DOC_TOPIC_DIST = "models/doc_topic_dist.dat"
+PATH_DICTIONARY = "C:/Users/Admin/Desktop/LDA_Viblo_Recommender_System/models/id2word.dict"
+PATH_CORPUS = "C:/Users/Admin/Desktop/LDA_Viblo_Recommender_System/models/corpus.mm"
+PATH_LDA_MODEL = "C:/Users/Admin/Desktop/LDA_Viblo_Recommender_System/models/LDA.model"
+PATH_DOC_TOPIC_DIST = "C:/Users/Admin/Desktop/LDA_Viblo_Recommender_System/models/doc_topic_dist.dat"
 
 
 def head(stream, n=10):
@@ -211,17 +211,17 @@ def main():
     id2word.compactify()
 
     # save dictionary
-    # id2word.save('path_to_save_file.dictionary')
+    # id2word.save(PATH_DICTIONARY)
     cospus = StreamCorpus(sentences, id2word)
     # save corpus
-    # gensim.corpora.MmCorpus.serialize('path_to_save_file.mm', cospus)
+    # gensim.corpora.MmCorpus.serialize(PATH_CORPUS, corpus)
     # load corpus
-    # mm_corpus = gensim.corpora.MmCorpus('path_to_save_file.mm')
+    # mm_corpus = gensim.corpora.MmCorpus(PATH_CORPUS)
     lda_model = gensim.models.ldamodel.LdaModel(
         cospus, num_topics=64, id2word=id2word, passes=10, chunksize=100
     )
     # save model
-    # lda_model.save('path_to_save_model.model')
+    # lda_model.save(PATH_LDA_MODEL)
     lda_model.print_topics(-1)
 
 

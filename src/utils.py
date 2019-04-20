@@ -9,7 +9,7 @@ logging.basicConfig(format='%(levelname)s : %(message)s', level=logging.INFO)
 logging.root.level = logging.INFO
 
 
-with open('data/vni_stopwords.txt') as f:
+with open(r"C:\Users\Admin\Desktop\LDA_Viblo_Recommender_System\data\vni_stopwords.txt",encoding="utf8") as f:
     stopwords = []
     for line in f:
         stopwords.append("_".join(line.strip().split()))
@@ -99,11 +99,11 @@ def remain_tags_space(text, tags_space):
 
 
 def remove_emails(text):
-    return re.sub('\S*@\S*\s?', '', text)
+    return re.sub(r'\S*@\S*\s?', '', text)
 
 
 def remove_newline_characters(text):
-    return re.sub('\s+', ' ', text)
+    return re.sub(r'\s+', ' ', text)
 
 
 def remove_links_content(text):
@@ -112,7 +112,7 @@ def remove_links_content(text):
 
 
 def remove_multiple_space(text):
-    return re.sub("\s\s+", " ", text)
+    return re.sub(r"\s\s+", " ", text)
 
 
 def remove_punctuation(text):

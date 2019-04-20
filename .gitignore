@@ -1,0 +1,9 @@
+corpus.mm
+corpus.mm.index
+doc_topic_dist.dat
+id2word.dict
+LDA.model
+LDA.model.expElogbeta.npy
+LDA.model.id2word
+LDA.model.state
+venv
