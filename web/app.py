@@ -8,8 +8,8 @@ import pymongo
 
 import settings
 from src.distances import get_most_similar_documents
-from src.models import make_texts_corpus
 from src.utils import markdown_to_text
+from gensim.utils import simple_preprocess
 
 client = pymongo.MongoClient(settings.MONGODB_SETTINGS["host"])
 db = client[settings.MONGODB_SETTINGS["db"]]
@@ -18,13 +18,16 @@ mongo_col = db[settings.MONGODB_SETTINGS["collection"]]
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "framgia123")
 
-# app.config.from_object('web.config.DevelopmentConfig')
 logging.basicConfig(
     format='%(asctime)s : %(levelname)s : %(message)s',
     level=logging.INFO
 )
 
+def make_texts_corpus(sentences):
+    for sentence in sentences:
+        yield simple_preprocess(sentence, deacc=True)
 
+# load file models
 def load_model():
     import gensim  # noqa
     from sklearn.externals import joblib  # noqa
@@ -66,6 +69,7 @@ def show_posts():
     posts = mongo_col.find({"idrs": {"$in": idrss}})
     random_posts = [
         {
+            "idrs": post["idrs"],
             "url": post["url"],
             "title": post["title"],
             "slug": post["slug"]
@@ -89,6 +93,7 @@ def show_post(slug):
     content = markdown_to_text(main_post["content"])
     text_corpus = make_texts_corpus([content])
     bow = id2word.doc2bow(next(text_corpus))
+    # sử dụng dictionary và LDA model đã train và lưu lại để thu được vector document_dist, ứng với phân bố các topic của document đó
     doc_distribution = np.array(
         [doc_top[1] for doc_top in lda_model.get_document_topics(bow=bow)]
     )
@@ -113,39 +118,5 @@ def show_post(slug):
     )
 
 
-# @app.route('/posts_HAU/<slug>', methods=["GET"])
-# def show_post_HAU(slug):
-#     """
-#     Author: Thanh Hau
-#     """
-#     from sklearn.externals import joblib  # noqa
-#     sim_topics = joblib.load('data/similarity_dict_HAU.pkl')
-#     main_post = mongo_col.find_one({"slug": slug})
-#     main_post = [
-#         {
-#             "url": main_post["url"],
-#             "title": main_post["title"],
-#             "slug": main_post["slug"],
-#             "content": main_post["contents"]
-#         }
-#     ]
-#     main_post = main_post[0]
-#
-#     most_sim_slugs = sim_topics[slug]
-#     posts = mongo_col.find({"slug": {"$in": most_sim_slugs}})
-#     related_posts = [
-#         {
-#             "url": post["canonical_url"],
-#             "title": post["title"],
-#             "slug": post["slug"]
-#         }
-#         for post in posts
-#     ]
-#
-#     return render_template(
-#         'index.html', main_post=main_post, posts=related_posts
-#     )
-
-
 if __name__ == "__main__":
-    app.run(host='127.0.0.1', debug=True)
+    app.run(host='127.0.0.1', debug=False)

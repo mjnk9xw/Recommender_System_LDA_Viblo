@@ -1,3 +1,5 @@
+# chứa các file setting cho mongodb và path models
+
 MONGODB_SETTINGS = {
     'db': 'rsframgia',
     'collection': 'viblo_posts',

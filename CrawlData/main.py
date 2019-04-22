@@ -13,8 +13,8 @@ fmt_url = 'https://api.viblo.asia/posts?page={}'
 client = MongoClient('localhost', 27017)
 db = client['rsframgia']
 col = db['viblo_posts']
-#col.count()
 page = 1
+# crawldata từ api về mongodb
 while True:
     try:
         req = requests.get(fmt_url.format(page))
@@ -35,8 +35,8 @@ while True:
 
         if page % 50 == 0:
             print("page: ",page)
-            print("col count: ")
-            print(col.count())
+            # print("col count: ")
+            # print(col.count())
     except Exception as e:
         print("error:")
         print(e)
@@ -45,19 +45,20 @@ while True:
 #%%
 from src.utils import markdown_to_text
 
-posts = col.find()
-
-type(posts)
-for i, post in enumerate(posts):
-    print(post['url'])
-    if i == 10: break
-posts = col.find()
-test_post = next(posts)
-raaw_content = test_post['content']
-print(raaw_content)
-content = markdown_to_text(raaw_content)
-print(content)
-test_post['_id']
+# posts = col.find()
+#
+# type(posts)
+# for i, post in enumerate(posts):
+#     print(post['url'])
+#     if i == 10:
+#         break
+# posts = col.find()
+# test_post = next(posts)
+# raaw_content = test_post['content']
+# print(raaw_content)
+# content = markdown_to_text(raaw_content)
+# print(content)
+# test_post['_id']
 for i, post in tqdm(enumerate(col.find()), total=col.count()):
     try:
         col.update_one({"_id": post["_id"]}, {"$set": {"idrs": i}})
@@ -66,13 +67,13 @@ for i, post in tqdm(enumerate(col.find()), total=col.count()):
     except Exception as e:
         print(e)
         continue
-client = MongoClient('localhost', 27017)
-db = client['rsframgia']
-col = db['viblo_posts']
+# client = MongoClient('localhost', 27017)
+# db = client['rsframgia']
+# col = db['viblo_posts']
 
-posts = col.find()
-test_post = next(posts)
-test_post['pp_content']
+# posts = col.find()
+# test_post = next(posts)
+# test_post['pp_content']
 
 # %%
 import itertools
@@ -88,13 +89,11 @@ def make_sentences():
 
 
 # %%
+# 2 hàm để thực hiện hỗ trợ việc fetch dữ liệu theo iterable object thay vì là 1 mảng (list hoặc numpy array) có trong gensim
 def make_texts_corpus(sentences):
     for sentence in sentences:
         yield simple_preprocess(sentence, deacc=True)
 
-
-#         yield [word for word in sentence.split()]
-# %%
 class StreamCorpus(object):
     def __init__(self, sentences, dictionary, clip_docs=None):
         """
@@ -114,6 +113,7 @@ class StreamCorpus(object):
         return self.clip_docs
 
 
+
 # %%
 import sys
 
@@ -124,6 +124,8 @@ sentences = make_texts_corpus(sentences)
 id2word = gensim.corpora.Dictionary(sentences)
 id2word.filter_extremes(no_below=10, no_above=0.25)
 id2word.compactify()
+
+#map giữa index với từ .
 id2word.save('C:/Users/Admin/Desktop/LDA_Viblo_Recommender_System/models/id2word.dict')
 len(id2word)
 # %%
@@ -136,27 +138,26 @@ for i in range(10):
 # %%
 sentences = make_sentences()
 cospus = StreamCorpus(sentences, id2word)
-# %%
-# for i, c in enumerate(corpus):
-#     print(c)
-#     if i == 10: break
-# %%
+
 # save corpus
+# map giữ index với tần số của từ
 gensim.corpora.MmCorpus.serialize('C:/Users/Admin/Desktop/LDA_Viblo_Recommender_System/models/corpus.mm', cospus)
 # %%
 corpus = gensim.corpora.MmCorpus('C:/Users/Admin/Desktop/LDA_Viblo_Recommender_System/models/corpus.mm')
 # %%
-# next(iter(corpus))
-# %%
+# số topic = 64 , quy định ma trận documents x topics tương ứng 64 chiều.
 lda_model = gensim.models.ldamodel.LdaModel(corpus, id2word=id2word, num_topics=64, passes=10,
                                             chunksize=100, random_state=42, alpha=1e-2, eta=0.5e-2,
                                             minimum_probability=0.0, per_word_topics=False)
 # %%
-# save model
+# save lda.model để sử dụng
 lda_model.save('C:/Users/Admin/Desktop/LDA_Viblo_Recommender_System/models/LDA.model')
 lda_model.print_topics(10)
+
 # %%
+# thực hiện tính toán ma trận documents x topics rồi lưu vào file doc_topic_dist.dat
 import numpy as np
+
 
 doc_topic_dist = np.array(
     [[tup[1] for tup in lst] for lst in lda_model[corpus]]
