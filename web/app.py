@@ -5,11 +5,12 @@ import random
 from flask import Flask, jsonify, render_template
 import numpy as np
 import pymongo
-
 import settings
 from src.distances import get_most_similar_documents
 from src.utils import markdown_to_text
 from gensim.utils import simple_preprocess
+from flask import request
+
 
 client = pymongo.MongoClient(settings.MONGODB_SETTINGS["host"])
 db = client[settings.MONGODB_SETTINGS["db"]]
@@ -55,12 +56,23 @@ def load_model():
 lda_model, corpus, id2word, doc_topic_dist = load_model()
 
 
-@app.route('/ping', methods=['GET'])
-def ping_pong():
-    return jsonify({
-        'call': 'success',
-        'message': 'pong!'
-    })
+
+def md2html(md_content):
+    import markdown
+    md = markdown.Markdown()
+    html = md.convert(md_content)
+    return html
+
+def get_content_of_post(slug):
+    import requests
+    fmt_url = 'https://api.viblo.asia/posts/' + slug
+    req = requests.get(fmt_url)
+    if req.status_code != 200:
+        return ''
+    data = req.json()['post']
+    content = data['data']['contents']
+    return content
+
 
 
 @app.route('/posts/', methods=["GET"])
@@ -76,17 +88,45 @@ def show_posts():
         }
         for post in posts
     ]
-    return render_template('index.html', random_posts=random_posts)
+    return render_template('random.html', random_posts=random_posts)
+
+
+@app.route('/search', methods=['GET', 'POST'])
+def search():
+    search_text = request.form['search']
+    print('search text : ',search_text)
+    content = markdown_to_text(search_text)
+    text_corpus = make_texts_corpus([content])
+    bow = id2word.doc2bow(next(text_corpus))
+    doc_distribution = np.array(
+        [doc_top[1] for doc_top in lda_model.get_document_topics(bow=bow)]
+    )
+    # recommender posts
+    most_sim_ids = list(get_most_similar_documents(
+        doc_distribution, doc_topic_dist))[1:]
+
+    most_sim_ids = [int(id_) for id_ in most_sim_ids]
+    posts = mongo_col.find({"idrs": {"$in": most_sim_ids}})
+    related_posts = [
+                        {
+                            "url": post["url"],
+                            "title": post["title"],
+                            "slug": post["slug"]
+                        }
+                        for post in posts
+                    ][1:]
+    return render_template('search.html',search=related_posts)
 
 
 @app.route('/posts/<slug>', methods=["GET"])
 def show_post(slug):
     main_post = mongo_col.find_one({"slug": slug})
+    md = get_content_of_post(slug)
     main_post = {
         "url": main_post["url"],
         "title": main_post["title"],
         "slug": main_post["slug"],
-        "content": main_post["content"]
+        "content": md2html(md)
     }
 
     # preprocessing

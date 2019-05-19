@@ -63,7 +63,6 @@ def markdown_to_text(markdown_string, parser="html.parser",
 def remove_emails(text):
     return re.sub(r'\S*@\S*\s?', '', text)
 
-
 # xóa các dấu xuống dòng -> space
 def remove_newline_characters(text):
     return re.sub(r'\s+', ' ', text)

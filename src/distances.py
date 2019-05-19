@@ -3,6 +3,8 @@ from scipy.stats import entropy
 
 # https://www.kaggle.com/ktattan/lda-and-document-similarity
 
+# matrix là 1 ma trận doc x topics  => chính là ma trận chứa các từ word ứng với topic nào
+
 #so sánh độ tương tự với từng mẫu trong ma trận documents x topics
 def jensen_shannon(query, matrix):
     p = query[None, :].T  # take transpose

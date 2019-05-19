@@ -1,40 +1,27 @@
 {% extends "base.html" %}
+
 {% block content %}
-
-<h1>Recommender System - LDA , database API Viblo</h1>
-
-{% if random_posts %}
-	<h2> Random các bài viêt </h2>
-
-	{% for random_post in random_posts %}
-        <hr/>
-        <p>Title bài viết: {{ random_post.title }}</p>
-        <a href="{{ random_post.url }}">Xem bài viết này</a>
-        <br>
-        <br>
-        <p>Xem các bài viết liên quan đến bài viết này: </p><a href="{{ url_for('show_post', slug=random_post.slug) }}">{{ random_post.url }}</a>
-	{% endfor %}
-{% endif %}
-
 {% if main_post %}
 	<h2>Bài viết ban đầu</h2>
     <hr/>
 	<p>{{ main_post.title }}</p>
-	<a href="{{ main_post.url }}">Xem bài viết</a>
+    <div>{{ main_post.content | safe }}</div>
+
+    <br>
+	<a href="{{ main_post.url }}">Xem bài viết tại trang viblo</a>
     <hr/>
 {% endif %}
+{% endblock %}
 
+
+{% block related %}
 {% if posts %}
 	<h2>Các bài viết liên quan</h2>
 	{% for post in posts %}
         <hr/>
 		<p>{{ post.title }}</p>
-        <a href="{{ post.url }}">Xem bài viết này</a>
+        <a href="{{ url_for('show_post', slug=post.slug) }}">Xem bài viết này</a>
         <br/>
-        <br/>
-        <p>Xem các bài viết liên quan đến bài viết này</p><a href="{{ url_for('show_post', slug=post.slug) }}">{{ post.url }}</a>
-		<br>
 	{% endfor %}
 {% endif %}
-
 {% endblock %}

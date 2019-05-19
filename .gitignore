@@ -8,3 +8,4 @@ LDA.model.id2word
 LDA.model.state
 venv
 src/models.py
+src/__pycache__

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% if random_posts %}
+	<h2> Random các bài viêt </h2>
+
+	{% for random_post in random_posts %}
+        <hr/>
+        <p>Title bài viết: {{ random_post.title }}</p>
+        <a href="{{ url_for('show_post', slug=random_post.slug) }}">Xem bài viết này</a>
+	{% endfor %}
+{% endif %}
+{% endblock %}

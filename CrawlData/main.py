@@ -15,7 +15,7 @@ db = client['rsframgia']
 col = db['viblo_posts']
 page = 1
 # crawldata từ api về mongodb
-while True:
+while page < 1000:
     try:
         req = requests.get(fmt_url.format(page))
         if req.status_code != 200:
@@ -45,20 +45,20 @@ while True:
 #%%
 from src.utils import markdown_to_text
 
-# posts = col.find()
-#
-# type(posts)
-# for i, post in enumerate(posts):
-#     print(post['url'])
-#     if i == 10:
-#         break
-# posts = col.find()
-# test_post = next(posts)
-# raaw_content = test_post['content']
-# print(raaw_content)
-# content = markdown_to_text(raaw_content)
-# print(content)
-# test_post['_id']
+posts = col.find()
+
+type(posts)
+for i, post in enumerate(posts):
+    print(post['url'])
+    if i == 10:
+        break
+posts = col.find()
+test_post = next(posts)
+raaw_content = test_post['content']
+print(raaw_content)
+content = markdown_to_text(raaw_content)
+print(content)
+test_post['_id']
 for i, post in tqdm(enumerate(col.find()), total=col.count()):
     try:
         col.update_one({"_id": post["_id"]}, {"$set": {"idrs": i}})
@@ -67,13 +67,13 @@ for i, post in tqdm(enumerate(col.find()), total=col.count()):
     except Exception as e:
         print(e)
         continue
-# client = MongoClient('localhost', 27017)
-# db = client['rsframgia']
-# col = db['viblo_posts']
+client = MongoClient('localhost', 27017)
+db = client['rsframgia']
+col = db['viblo_posts']
 
-# posts = col.find()
-# test_post = next(posts)
-# test_post['pp_content']
+posts = col.find()
+test_post = next(posts)
+test_post['pp_content']
 
 # %%
 import itertools
@@ -112,8 +112,6 @@ class StreamCorpus(object):
     def __len__(self):
         return self.clip_docs
 
-
-
 # %%
 import sys
 
@@ -132,9 +130,9 @@ len(id2word)
 for i in range(10):
     print(id2word[i])
 # %%
-# sentences = make_sentences()
-# sentences = make_texts_corpus(sentences)
-# print(next(sentences))
+sentences = make_sentences()
+sentences = make_texts_corpus(sentences)
+print(next(sentences))
 # %%
 sentences = make_sentences()
 cospus = StreamCorpus(sentences, id2word)
@@ -150,7 +148,7 @@ lda_model = gensim.models.ldamodel.LdaModel(corpus, id2word=id2word, num_topics=
                                             chunksize=100, random_state=42, alpha=1e-2, eta=0.5e-2,
                                             minimum_probability=0.0, per_word_topics=False)
 # %%
-# save lda.model để sử dụng
+# save lda.model để sử dụng, mỗi 1 topic có các words với xác suất xuất hiện của nó .
 lda_model.save('C:/Users/Admin/Desktop/LDA_Viblo_Recommender_System/models/LDA.model')
 lda_model.print_topics(10)
 
